@@ -14,7 +14,7 @@ PatchProof makes those signals explicit and reviewable.
 
 ## Current status
 
-This is an early local CLI release. It accepts either a unified diff fixture or two explicit Git revisions, optionally reads a JUnit XML test-result report, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
+This is an early local CLI release. It accepts either a unified diff fixture or two explicit Git revisions, optionally reads JUnit XML test-result and coverage XML reports, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
 
 ## Non-goals
 
@@ -63,6 +63,19 @@ patchproof check \
 ```
 
 JUnit parsing reports suites, tests, failures, errors, skipped tests, and duration. It treats failures or errors as an overall error and does not treat test counts as proof of correctness.
+
+Attach coverage evidence and thresholds:
+
+```bash
+patchproof check \
+  --diff examples/source-with-tests.diff \
+  --junit examples/results.xml \
+  --coverage examples/coverage.xml \
+  --config examples/patchproof.json \
+  --output-dir /tmp/patchproof-report
+```
+
+The policy may configure `minimum_line_rate` and `minimum_branch_rate` as values from `0` to `1`. Missing branch data is an error when a branch threshold is configured. Coverage is treated as one signal and never as proof of correctness.
 
 The command writes:
 
@@ -141,7 +154,7 @@ The most useful early contributions are small and evidence-backed: a parser fixt
 ## Roadmap
 
 - Improve the Git adapter with rename-aware summaries and clearer revision diagnostics.
-- Add adapters for coverage formats and richer test-result metadata.
+- Add adapters for additional coverage formats and richer test-result metadata.
 - Add SARIF output.
 - Add policy examples for Python, JavaScript, Go, and Rust repositories.
 - Improve renamed-file and binary-file reporting.

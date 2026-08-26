@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "patchproof"
-version = "0.3.0a0"
+version = "0.4.0a0"
 description = "Evidence-first pull-request quality reports from observable repository signals."
 readme = "README.md"
 requires-python = ">=3.11"

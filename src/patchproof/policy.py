@@ -4,7 +4,8 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .models import ChangeSummary, Finding
+from .coverage import evaluate_coverage
+from .models import ChangeSummary, CoverageSummary, Finding
 
 DEFAULT_POLICY: dict[str, Any] = {
     "required_evidence": {
@@ -13,6 +14,7 @@ DEFAULT_POLICY: dict[str, Any] = {
         "dependency_change_requires_lockfile": True,
     },
     "commands": [],
+    "coverage": {},
     "limits": {"command_timeout_seconds": 30, "max_output_bytes": 12000},
 }
 
@@ -33,7 +35,7 @@ def load_policy(path: Path | None) -> dict[str, Any]:
     if not isinstance(data, dict):
         raise PolicyError("policy root must be an object")
     merged = json.loads(json.dumps(DEFAULT_POLICY))
-    for section in ("required_evidence", "limits"):
+    for section in ("required_evidence", "coverage", "limits"):
         if section in data:
             if not isinstance(data[section], dict):
                 raise PolicyError(f"policy section '{section}' must be an object")
@@ -61,7 +63,7 @@ def _validate_policy(policy: dict[str, Any]) -> None:
             raise PolicyError("command names and argument lists must be non-empty strings")
 
 
-def evaluate_policy(summary: ChangeSummary, policy: dict[str, Any]) -> tuple[Finding, ...]:
+def evaluate_policy(summary: ChangeSummary, policy: dict[str, Any], coverage_summary: CoverageSummary | None = None) -> tuple[Finding, ...]:
     findings: list[Finding] = []
     evidence = policy["required_evidence"]
     paths = tuple(item.path for item in summary.changed_files)
@@ -78,6 +80,8 @@ def evaluate_policy(summary: ChangeSummary, policy: dict[str, Any]) -> tuple[Fin
         findings.append(Finding("docs-for-public-interface", "warning", "pass" if has_docs else "warning", "Public-interface changes include documentation changes." if has_docs else "Public-interface changes have no documentation change.", paths))
     if has_dependency and evidence.get("dependency_change_requires_lockfile", True):
         findings.append(Finding("lockfile-for-dependency", "error", "pass" if has_lockfile else "error", "Dependency changes include a lockfile." if has_lockfile else "Dependency changes do not include a lockfile.", paths))
+    if coverage_summary is not None:
+        findings.extend(evaluate_coverage(coverage_summary, policy))
     if not findings:
         findings.append(Finding("no-rules-triggered", "pass", "pass", "No required-evidence rules were triggered.", paths))
     return tuple(findings)

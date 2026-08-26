@@ -4,29 +4,30 @@ import json
 from dataclasses import replace
 from typing import Any
 
-from .models import ChangeSummary, CommandResult, EvidenceReport, Finding, TestSummary
+from .models import ChangeSummary, CommandResult, CoverageSummary, EvidenceReport, Finding, TestSummary
 
-TOOL_VERSION = "0.3.0-alpha"
+TOOL_VERSION = "0.4.0-alpha"
 SCHEMA_VERSION = "0.1"
 
 
-def overall_status(findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], test_summary: TestSummary | None = None) -> str:
-    if any(item.status == "error" for item in findings) or any(item.status == "error" for item in commands) or (test_summary is not None and test_summary.status == "error"):
+def overall_status(findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], test_summary: TestSummary | None = None, coverage_summary: CoverageSummary | None = None) -> str:
+    if any(item.status == "error" for item in findings) or any(item.status == "error" for item in commands) or (test_summary is not None and test_summary.status == "error") or (coverage_summary is not None and coverage_summary.status == "error"):
         return "error"
     if any(item.status == "warning" for item in findings) or any(item.status == "warning" for item in commands):
         return "warning"
     return "pass"
 
 
-def build_report(summary: ChangeSummary, findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], *, test_summary: TestSummary | None = None, runtime_metadata: dict[str, Any] | None = None) -> EvidenceReport:
+def build_report(summary: ChangeSummary, findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], *, test_summary: TestSummary | None = None, coverage_summary: CoverageSummary | None = None, runtime_metadata: dict[str, Any] | None = None) -> EvidenceReport:
     return EvidenceReport(
         schema_version=SCHEMA_VERSION,
         tool_version=TOOL_VERSION,
         change_summary=summary,
         policy_findings=findings,
         command_results=commands,
-        overall_status=overall_status(findings, commands, test_summary),
+        overall_status=overall_status(findings, commands, test_summary, coverage_summary),
         test_summary=test_summary,
+        coverage_summary=coverage_summary,
         runtime_metadata=runtime_metadata or {},
     )
 
@@ -72,6 +73,17 @@ def render_markdown(report: EvidenceReport) -> str:
             f"Errors: **{test.errors}**  ",
             f"Skipped: **{test.skipped}**  ",
             f"Duration: **{test.duration_ms} ms**", "",
+        ])
+    if report.coverage_summary is not None:
+        coverage = report.coverage_summary
+        line_percent = f"{coverage.line_rate:.1%}"
+        branch_percent = f"{coverage.branch_rate:.1%}" if coverage.branch_rate is not None else "not reported"
+        lines.extend([
+            "", "## Coverage evidence", "",
+            f"Line coverage: **{line_percent}**  ",
+            f"Branch coverage: **{branch_percent}**  ",
+            f"Lines: **{coverage.lines_covered if coverage.lines_covered is not None else 'not reported'} / {coverage.lines_valid if coverage.lines_valid is not None else 'not reported'}**  ",
+            f"Branches: **{coverage.branches_covered if coverage.branches_covered is not None else 'not reported'} / {coverage.branches_valid if coverage.branches_valid is not None else 'not reported'}**", "",
         ])
     lines.extend(["", "## Command evidence", ""])
     if not report.command_results:

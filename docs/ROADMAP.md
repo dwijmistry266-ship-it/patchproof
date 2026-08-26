@@ -4,7 +4,7 @@ PatchProof will be completed in ordered milestones. Each milestone must be imple
 
 ## Current baseline: v0.2.0-alpha
 
-The repository currently supports manual unified-diff input and explicit Git base/head revisions. It classifies changed files, evaluates evidence rules, runs explicitly configured commands with bounded output and timeouts, and writes Markdown and JSON reports. The local suite contains 15 tests, and the public CI workflow passes.
+The repository currently supports manual unified-diff input, explicit Git base/head revisions, JUnit XML test-result evidence, and Cobertura/coverage.py-style XML coverage evidence with configurable thresholds. It classifies changed files, evaluates evidence rules, runs explicitly configured commands with bounded output and timeouts, and writes Markdown and JSON reports. The local suite contains 32 tests, and the public CI workflow passes through the prior milestone.
 
 ## Milestone 1 — JUnit XML test-result support
 
@@ -14,7 +14,7 @@ The repository currently supports manual unified-diff input and explicit Git bas
 
 **Release gate:** At least 8 new fixture-driven tests, updated README usage, and a passing GitHub Actions run.
 
-## Milestone 2 — Coverage evidence and richer findings
+## Milestone 2 — Coverage evidence and thresholds — complete locally as `0.4.0-alpha`
 
 **Goal:** Accept a standard coverage summary, compare it to configured thresholds, and report missing or insufficient coverage without pretending coverage proves correctness.
 

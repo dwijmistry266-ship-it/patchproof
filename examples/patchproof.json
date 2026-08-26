@@ -4,6 +4,10 @@
     "public_api_change_requires_docs": true,
     "dependency_change_requires_lockfile": true
   },
+  "coverage": {
+    "minimum_line_rate": 0.80,
+    "minimum_branch_rate": 0.70
+  },
   "commands": [
     {"name": "fixture-check", "command": ["python", "-c", "print('fixture command passed')"]}
   ],

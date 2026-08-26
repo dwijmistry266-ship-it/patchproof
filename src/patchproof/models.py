@@ -63,6 +63,20 @@ class TestSummary:
 
 
 @dataclass(frozen=True)
+class CoverageSummary:
+    line_rate: float
+    branch_rate: float | None = None
+    lines_covered: int | None = None
+    lines_valid: int | None = None
+    branches_covered: int | None = None
+    branches_valid: int | None = None
+
+    @property
+    def status(self) -> Status:
+        return "pass"
+
+
+@dataclass(frozen=True)
 class EvidenceReport:
     schema_version: str
     tool_version: str
@@ -71,6 +85,7 @@ class EvidenceReport:
     command_results: tuple[CommandResult, ...]
     overall_status: Status
     test_summary: TestSummary | None = None
+    coverage_summary: CoverageSummary | None = None
     runtime_metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self, include_runtime_metadata: bool = True) -> dict[str, Any]:
