@@ -1,0 +1,17 @@
+diff --git a/src/greeter.py b/src/greeter.py
+index 1111111..2222222 100644
+--- a/src/greeter.py
++++ b/src/greeter.py
+@@ -1,2 +1,3 @@
+ def greet(name):
+-    return f"Hello {name}"
++    name = name.strip()
++    return f"Hello {name}"
+
+diff --git a/tests/test_greeter.py b/tests/test_greeter.py
+index 3333333..4444444 100644
+--- a/tests/test_greeter.py
++++ b/tests/test_greeter.py
+@@ -1,1 +1,2 @@
+ def test_greet():
++    assert greet("Dwij") == "Hello Dwij"

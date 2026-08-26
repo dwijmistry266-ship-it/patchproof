@@ -1,0 +1,103 @@
+name: PatchProof
+
+author: Dwij Mistry
+description: Evidence-first pull-request quality reports from observable repository signals.
+
+branding:
+  color: blue
+  icon: check-circle
+
+inputs:
+  base:
+    description: Base Git revision. Defaults to the pull request base SHA or push event before SHA.
+    required: false
+    default: ''
+  head:
+    description: Head Git revision. Defaults to the current GitHub SHA.
+    required: false
+    default: ''
+  diff:
+    description: Optional path to a unified diff. When set, Git revision mode is not used.
+    required: false
+    default: ''
+  config:
+    description: Optional path to a PatchProof JSON policy relative to the workspace.
+    required: false
+    default: ''
+  junit:
+    description: Optional path to a JUnit XML test-result report relative to the workspace.
+    required: false
+    default: ''
+  coverage:
+    description: Optional path to a Cobertura/coverage.py XML report relative to the workspace.
+    required: false
+    default: ''
+  output-dir:
+    description: Directory for Markdown, JSON, and SARIF reports.
+    required: false
+    default: .patchproof/report
+  skip-commands:
+    description: Skip policy-configured commands. Keep true for untrusted pull requests.
+    required: false
+    default: 'true'
+  upload-sarif:
+    description: Upload the generated SARIF report to GitHub code scanning.
+    required: false
+    default: 'false'
+  artifact-name:
+    description: Name of the uploaded PatchProof report artifact.
+    required: false
+    default: patchproof-report
+
+outputs:
+  status:
+    description: Overall PatchProof status from the generated JSON report.
+    value: ${{ steps.patchproof.outputs.status }}
+  report-dir:
+    description: Relative directory containing the generated reports.
+    value: ${{ steps.patchproof.outputs.report-dir }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      with:
+        python-version: '3.11'
+
+    - name: Install PatchProof
+      shell: bash
+      run: python -m pip install --disable-pip-version-check --no-deps "$GITHUB_ACTION_PATH"
+
+    - name: Run PatchProof
+      id: patchproof
+      shell: bash
+      env:
+        PATCHPROOF_BASE_INPUT: ${{ inputs.base }}
+        PATCHPROOF_HEAD_INPUT: ${{ inputs.head }}
+        PATCHPROOF_DIFF_INPUT: ${{ inputs.diff }}
+        PATCHPROOF_CONFIG_INPUT: ${{ inputs.config }}
+        PATCHPROOF_JUNIT_INPUT: ${{ inputs.junit }}
+        PATCHPROOF_COVERAGE_INPUT: ${{ inputs.coverage }}
+        PATCHPROOF_OUTPUT_DIR: ${{ inputs.output-dir }}
+        PATCHPROOF_SKIP_COMMANDS: ${{ inputs.skip-commands }}
+        PATCHPROOF_EVENT_NAME: ${{ github.event_name }}
+        PATCHPROOF_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        PATCHPROOF_EVENT_BEFORE: ${{ github.event.before }}
+        PATCHPROOF_SHA: ${{ github.sha }}
+      run: $GITHUB_ACTION_PATH/action/run.sh
+
+    - name: Upload PatchProof reports
+      if: ${{ always() }}
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ inputs.output-dir }}
+        if-no-files-found: warn
+
+    - name: Upload PatchProof SARIF
+      if: ${{ inputs.upload-sarif == 'true' && always() }}
+      uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4
+      with:
+        sarif_file: ${{ inputs.output-dir }}/results.sarif
+        category: patchproof

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="PatchProof example">
+  <testsuite name="unit" tests="2" failures="0" errors="0" skipped="1" time="0.120">
+    <testcase classname="demo" name="passes" time="0.080" />
+    <testcase classname="demo" name="skips" time="0.040"><skipped /></testcase>
+  </testsuite>
+</testsuites>
