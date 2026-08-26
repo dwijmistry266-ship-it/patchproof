@@ -85,7 +85,7 @@ runs:
         PATCHPROOF_PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
         PATCHPROOF_EVENT_BEFORE: ${{ github.event.before }}
         PATCHPROOF_SHA: ${{ github.sha }}
-      run: $GITHUB_ACTION_PATH/action/run.sh
+      run: bash "$GITHUB_ACTION_PATH/action/run.sh"
 
     - name: Upload PatchProof reports
       if: ${{ always() }}
