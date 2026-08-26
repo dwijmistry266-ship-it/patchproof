@@ -1,0 +1,14 @@
+{
+  "required_evidence": {
+    "source_change_requires_tests": true,
+    "public_api_change_requires_docs": true,
+    "dependency_change_requires_lockfile": true
+  },
+  "commands": [
+    {"name": "fixture-check", "command": ["python", "-c", "print('fixture command passed')"]}
+  ],
+  "limits": {
+    "command_timeout_seconds": 5,
+    "max_output_bytes": 1000
+  }
+}
