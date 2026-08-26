@@ -2,17 +2,27 @@
 
 All notable changes to PatchProof are documented here.
 
+## [0.6.0-alpha] — 2026-08-26
+
+### Added
+
+PatchProof now includes a reusable composite GitHub Action in `action.yml`. The action accepts explicit diff or base/head inputs, defaults to full-history checkout in the consumer workflow, generates Markdown, JSON, and SARIF reports, uploads reports as an artifact, and can optionally upload SARIF to GitHub code scanning.
+
+The action defaults to `skip-commands: 'true'` so repository-configured evidence commands are not executed for untrusted pull requests. It fails clearly when a push event has no usable previous revision and documents why `pull_request_target` is not used for the default workflow.
+
+### Verification
+
+The local action harness exercises a two-commit Git repository, Git revision selection, report generation, and output propagation. The complete Python suite contains 36 passing tests.
+
 ## [0.5.0-alpha] — 2026-08-26
 
 ### Added
 
-PatchProof can now render deterministic SARIF 2.1.0 output from non-passing policy findings. Results include stable rule IDs, severity levels, messages, relative artifact locations when related files exist, and partial fingerprints. Passing findings are omitted because they are evidence rather than alerts.
-
-The milestone adds tests for top-level SARIF structure, rule and result mapping, severity conversion, relative paths, global findings, deterministic output, and CLI generation. It also documents the relationship between PatchProof’s local reports and GitHub’s supported SARIF subset.
+PatchProof can render deterministic SARIF 2.1.0 output from non-passing policy findings with stable rule IDs, severity levels, messages, relative artifact locations, and partial fingerprints.
 
 ### Limitations
 
-Global findings are retained without fabricated source locations and may not appear as file annotations in GitHub code-scanning views. SARIF generation alone does not upload results to GitHub and does not prove correctness, security, authorship, or production readiness.
+Global findings are retained without fabricated source locations and may not appear as file annotations in GitHub code-scanning views. SARIF generation alone does not upload results to GitHub.
 
 ## [0.4.0-alpha] — 2026-08-26
 

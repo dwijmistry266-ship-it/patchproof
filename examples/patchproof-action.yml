@@ -1,0 +1,31 @@
+# Copy this file to .github/workflows/patchproof.yml in a consumer repository.
+# Replace the action reference with a reviewed release tag or commit SHA.
+name: PatchProof
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Run PatchProof
+        uses: dwijmistry266-ship-it/patchproof@v0.6.0-alpha
+        with:
+          config: examples/patchproof.json
+          junit: examples/results.xml
+          coverage: examples/coverage.xml
+          upload-sarif: 'true'
+          skip-commands: 'true'

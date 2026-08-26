@@ -172,7 +172,17 @@ The most useful early contributions are small and evidence-backed: a parser fixt
 - Improve SARIF locations for global findings and add richer rule metadata.
 - Add policy examples for Python, JavaScript, Go, and Rust repositories.
 - Improve renamed-file and binary-file reporting.
-- Publish a GitHub Action only after the local CLI behavior is stable.
+- Publish the reusable GitHub Action only after local behavior and the consumer workflow are stable.
+
+## Reusable GitHub Action
+
+PatchProof includes a composite action in `action.yml`. A consumer repository can copy `examples/patchproof-action.yml` to `.github/workflows/patchproof.yml` and adjust the action reference to a reviewed release tag or commit SHA.
+
+The action checks out full history, compares the pull request base SHA with the event SHA, generates Markdown, JSON, and SARIF reports, and uploads the reports as a workflow artifact. It defaults to `skip-commands: 'true'` so untrusted pull-request code is not executed through repository-configured evidence commands. Enable `upload-sarif: 'true'` only when the workflow has `security-events: write` permission and the repository’s code-scanning settings allow SARIF ingestion.
+
+Use `pull_request`, not `pull_request_target`, for the default consumer workflow. GitHub documents that `pull_request_target` runs with the base repository’s token and secrets, and checking out and executing fork-controlled code in that context can create a “pwn request” vulnerability [4]. The action does not require secrets and does not check out fork head code through an elevated-trust event.
+
+The action intentionally fails clearly when a push event has no usable previous revision, such as a newly created branch. In that case, pass an explicit `base` input or use a manual `diff` input.
 
 ## SARIF references
 
@@ -181,6 +191,7 @@ PatchProof targets SARIF 2.1.0 as specified by OASIS [1]. GitHub’s supported S
 [1]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/sarif-v2.1.0-errata01-os-complete.html
 [2]: https://docs.github.com/en/code-security/reference/code-scanning/sarif-files/sarif-support
 [3]: https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/integrate-with-existing-tools/upload-sarif-file
+[4]: https://docs.github.com/en/actions/reference/security/securely-using-pull_request_target
 
 ## License
 

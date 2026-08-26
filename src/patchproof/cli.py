@@ -29,6 +29,7 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--junit", type=Path, default=None, help="Path to a JUnit XML test-result report")
     check.add_argument("--coverage", type=Path, default=None, help="Path to a Cobertura/coverage.py XML report")
     check.add_argument("--sarif", type=Path, default=None, help="Optional path for a SARIF 2.1.0 report")
+    check.add_argument("--skip-commands", action="store_true", help="Do not execute policy-configured evidence commands")
     return parser
 
 
@@ -49,7 +50,7 @@ def run_check(args: argparse.Namespace) -> int:
         coverage_summary = parse_coverage_file(args.coverage) if args.coverage else None
         policy = load_policy(args.config)
         findings = evaluate_policy(summary, policy, coverage_summary=coverage_summary)
-        commands = run_commands(
+        commands = () if args.skip_commands else run_commands(
             policy["commands"],
             timeout_seconds=policy["limits"]["command_timeout_seconds"],
             max_output_bytes=policy["limits"]["max_output_bytes"],
