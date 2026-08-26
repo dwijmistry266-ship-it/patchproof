@@ -4,28 +4,29 @@ import json
 from dataclasses import replace
 from typing import Any
 
-from .models import ChangeSummary, CommandResult, EvidenceReport, Finding
+from .models import ChangeSummary, CommandResult, EvidenceReport, Finding, TestSummary
 
-TOOL_VERSION = "0.1.0"
+TOOL_VERSION = "0.3.0-alpha"
 SCHEMA_VERSION = "0.1"
 
 
-def overall_status(findings: tuple[Finding, ...], commands: tuple[CommandResult, ...]) -> str:
-    if any(item.status == "error" for item in findings) or any(item.status == "error" for item in commands):
+def overall_status(findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], test_summary: TestSummary | None = None) -> str:
+    if any(item.status == "error" for item in findings) or any(item.status == "error" for item in commands) or (test_summary is not None and test_summary.status == "error"):
         return "error"
     if any(item.status == "warning" for item in findings) or any(item.status == "warning" for item in commands):
         return "warning"
     return "pass"
 
 
-def build_report(summary: ChangeSummary, findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], *, runtime_metadata: dict[str, Any] | None = None) -> EvidenceReport:
+def build_report(summary: ChangeSummary, findings: tuple[Finding, ...], commands: tuple[CommandResult, ...], *, test_summary: TestSummary | None = None, runtime_metadata: dict[str, Any] | None = None) -> EvidenceReport:
     return EvidenceReport(
         schema_version=SCHEMA_VERSION,
         tool_version=TOOL_VERSION,
         change_summary=summary,
         policy_findings=findings,
         command_results=commands,
-        overall_status=overall_status(findings, commands),
+        overall_status=overall_status(findings, commands, test_summary),
+        test_summary=test_summary,
         runtime_metadata=runtime_metadata or {},
     )
 
@@ -60,6 +61,18 @@ def render_markdown(report: EvidenceReport) -> str:
     for finding in report.policy_findings:
         related = ", ".join(f"`{path}`" for path in finding.related_files) or "none"
         lines.append(f"- **{_status_icon(finding.status)}** `{finding.finding_id}` — {finding.message} Related files: {related}.")
+    if report.test_summary is not None:
+        test = report.test_summary
+        lines.extend([
+            "", "## Test-result evidence", "",
+            f"**Status:** `{_status_icon(test.status)}`  ",
+            f"Suites: **{test.suites}**  ",
+            f"Tests: **{test.tests}**  ",
+            f"Failures: **{test.failures}**  ",
+            f"Errors: **{test.errors}**  ",
+            f"Skipped: **{test.skipped}**  ",
+            f"Duration: **{test.duration_ms} ms**", "",
+        ])
     lines.extend(["", "## Command evidence", ""])
     if not report.command_results:
         lines.append("No commands were configured.")

@@ -14,7 +14,7 @@ PatchProof makes those signals explicit and reviewable.
 
 ## Current status
 
-This is an early local CLI release. It accepts either a unified diff fixture or two explicit Git revisions, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
+This is an early local CLI release. It accepts either a unified diff fixture or two explicit Git revisions, optionally reads a JUnit XML test-result report, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
 
 ## Non-goals
 
@@ -51,6 +51,18 @@ patchproof check \
 ```
 
 PatchProof validates both revisions before asking Git for a binary-aware diff. Revision arguments are passed without shell interpolation, and a revision beginning with `-` is rejected.
+
+Attach JUnit test-result evidence when a test runner has produced an XML report:
+
+```bash
+patchproof check \
+  --diff examples/source-with-tests.diff \
+  --junit examples/results.xml \
+  --config examples/patchproof.json \
+  --output-dir /tmp/patchproof-report
+```
+
+JUnit parsing reports suites, tests, failures, errors, skipped tests, and duration. It treats failures or errors as an overall error and does not treat test counts as proof of correctness.
 
 The command writes:
 
@@ -129,7 +141,7 @@ The most useful early contributions are small and evidence-backed: a parser fixt
 ## Roadmap
 
 - Improve the Git adapter with rename-aware summaries and clearer revision diagnostics.
-- Add adapters for common test-result and coverage formats.
+- Add adapters for coverage formats and richer test-result metadata.
 - Add SARIF output.
 - Add policy examples for Python, JavaScript, Go, and Rust repositories.
 - Improve renamed-file and binary-file reporting.

@@ -49,6 +49,20 @@ class ChangeSummary:
 
 
 @dataclass(frozen=True)
+class TestSummary:
+    suites: int
+    tests: int
+    failures: int
+    errors: int
+    skipped: int
+    duration_ms: int
+
+    @property
+    def status(self) -> Status:
+        return "error" if self.failures or self.errors else "pass"
+
+
+@dataclass(frozen=True)
 class EvidenceReport:
     schema_version: str
     tool_version: str
@@ -56,6 +70,7 @@ class EvidenceReport:
     policy_findings: tuple[Finding, ...]
     command_results: tuple[CommandResult, ...]
     overall_status: Status
+    test_summary: TestSummary | None = None
     runtime_metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self, include_runtime_metadata: bool = True) -> dict[str, Any]:
