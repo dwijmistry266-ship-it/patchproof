@@ -14,7 +14,7 @@ PatchProof makes those signals explicit and reviewable.
 
 ## Current status
 
-This is an early local CLI release. It accepts a unified diff and a JSON policy file, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
+This is an early local CLI release. It accepts either a unified diff fixture or two explicit Git revisions, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
 
 ## Non-goals
 
@@ -30,7 +30,7 @@ python3 -m venv .venv
 python -m pip install -e .
 ```
 
-Run the included example:
+Run the included fixture example:
 
 ```bash
 patchproof check \
@@ -38,6 +38,19 @@ patchproof check \
   --config examples/patchproof.json \
   --output-dir /tmp/patchproof-report
 ```
+
+For a real Git repository, compare two explicit commit-ish revisions:
+
+```bash
+patchproof check \
+  --repo . \
+  --base main \
+  --head HEAD \
+  --config examples/patchproof.json \
+  --output-dir patchproof-report
+```
+
+PatchProof validates both revisions before asking Git for a binary-aware diff. Revision arguments are passed without shell interpolation, and a revision beginning with `-` is rejected.
 
 The command writes:
 
@@ -115,7 +128,7 @@ The most useful early contributions are small and evidence-backed: a parser fixt
 
 ## Roadmap
 
-- Add a Git adapter that creates a diff from explicit base and head revisions.
+- Improve the Git adapter with rename-aware summaries and clearer revision diagnostics.
 - Add adapters for common test-result and coverage formats.
 - Add SARIF output.
 - Add policy examples for Python, JavaScript, Go, and Rust repositories.
