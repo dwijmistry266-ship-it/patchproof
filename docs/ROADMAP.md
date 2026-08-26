@@ -2,9 +2,9 @@
 
 PatchProof will be completed in ordered milestones. Each milestone must be implemented, tested, documented, and verified in GitHub before the next milestone begins.
 
-## Current baseline: v0.6.0-alpha (local; public repository pending update)
+## Current baseline: v1.0.0 release candidate (local; public upload pending)
 
-The repository currently supports manual unified-diff input, explicit Git base/head revisions, JUnit XML test-result evidence, Cobertura/coverage.py-style XML coverage evidence with configurable thresholds, deterministic SARIF 2.1.0 output, and a reusable composite GitHub Action. It classifies changed files, evaluates evidence rules, runs explicitly configured commands with bounded output and timeouts, and writes Markdown, JSON, and SARIF reports. The local suite contains 36 tests, and the local action harness passes.
+The repository supports manual unified-diff input, explicit Git base/head revisions, JUnit XML test-result evidence, Cobertura/coverage.py-style XML coverage evidence with configurable thresholds, deterministic SARIF 2.1.0 output, and a reusable composite GitHub Action. It classifies changed files, evaluates evidence rules, runs explicitly configured commands with bounded output and timeouts, and writes Markdown, JSON, and SARIF reports. The local suite contains 40 tests, the local Action harness passes, and release automation and issue templates are prepared. The public v1.0.0 tag and external trial remain release gates.
 
 ## Milestone 1 — JUnit XML test-result support
 
@@ -38,13 +38,13 @@ The repository currently supports manual unified-diff input, explicit Git base/h
 
 **Release gate:** A self-test workflow, documented permissions, an example consumer repository or fixture, and successful CI execution.
 
-## Milestone 5 — Hardening and v1.0
+## Milestone 5 — Hardening and v1.0 — release candidate complete locally
 
 **Goal:** Improve parser behavior, error messages, compatibility documentation, release process, and contributor experience.
 
-**Definition of done:** The project has a changelog, versioning policy, security policy, contribution guide, reproducible release instructions, regression fixtures, and a clear list of unsupported cases. At least one external developer has reviewed or tried the tool.
+**Definition of done:** The project has a changelog, versioning policy, security policy, contribution guide, reproducible release instructions, regression fixtures, issue templates, and a clear list of unsupported cases. The local release candidate has no known high-severity defect in its documented scope and has a full test and Action-harness pass. External review or trial is intentionally still pending.
 
-**Release gate:** No known high-severity defects in the documented scope, full CI pass, tagged v1.0.0 release, and a public development note explaining what was learned.
+**Release gate:** Public upload of the release candidate, green `Tests` and `Action self-test` workflows, a tagged non-prerelease `v1.0.0`, and one public feedback issue or external trial. The release notes must explain what was learned without claiming adoption or correctness guarantees.
 
 ## Publication rule
 

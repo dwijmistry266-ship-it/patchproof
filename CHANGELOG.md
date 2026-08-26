@@ -2,6 +2,20 @@
 
 All notable changes to PatchProof are documented here.
 
+## [1.0.0] — 2026-08-26
+
+### Added
+
+PatchProof v1.0.0 hardens unified-diff path parsing for quoted paths and spaces, counts multiple hunks correctly, validates `a/` and `b/` path prefixes, and rejects malformed coverage thresholds during policy loading. It also adds stable package metadata, reproducible release instructions, a tag-driven release verification workflow, and issue templates for reproducible bug reports and evidence-based feedback.
+
+### Security and scope
+
+The reusable Action keeps command execution disabled by default, documents the trust boundary around configured commands, uses least-privilege workflow permissions, and recommends reviewed release tags or full commit SHAs for consumers. PatchProof remains an evidence summarizer rather than a correctness, security, authorship, or production-readiness certifier.
+
+### Verification
+
+The local release candidate passes the complete 40-test Python suite, the composite Action harness, shell syntax checks, package build checks, and clean-install smoke tests. External review and adoption are intentionally not claimed; the repository includes a feedback path for those to happen publicly.
+
 ## [0.6.0-alpha] — 2026-08-26
 
 ### Added

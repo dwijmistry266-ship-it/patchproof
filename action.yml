@@ -61,7 +61,7 @@ runs:
   using: composite
   steps:
     - name: Set up Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
       with:
         python-version: '3.11'
 
@@ -89,7 +89,7 @@ runs:
 
     - name: Upload PatchProof reports
       if: ${{ always() }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ inputs.output-dir }}
@@ -97,7 +97,7 @@ runs:
 
     - name: Upload PatchProof SARIF
       if: ${{ inputs.upload-sarif == 'true' && always() }}
-      uses: github/codeql-action/upload-sarif@v4
+      uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4
       with:
         sarif_file: ${{ inputs.output-dir }}/results.sarif
         category: patchproof

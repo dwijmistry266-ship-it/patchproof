@@ -14,21 +14,34 @@ PatchProof makes those signals explicit and reviewable.
 
 ## Current status
 
-This is an early local CLI release. It accepts either a unified diff fixture or two explicit Git revisions, optionally reads JUnit XML test-result and coverage XML reports, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic `report.md` and `report.json` files.
+PatchProof is a small, inspectable CLI and reusable GitHub Action for evidence-first pull-request reporting. It accepts either a unified diff fixture or two explicit Git revisions, optionally reads JUnit XML test-result and coverage XML reports, classifies changed files, evaluates evidence rules, runs explicitly configured commands with safe bounds, and writes deterministic Markdown, JSON, and SARIF reports. The current local release candidate is `1.0.0`.
 
 ## Non-goals
 
-PatchProof does not detect AI authorship, certify security, prove correctness, judge contributor intent, guarantee production readiness, or sandbox arbitrary code. Configured commands execute with the permissions of the user running the tool. Read `docs/threat-model.md` before using it on untrusted repositories.
+PatchProof does not detect AI authorship, certify security, prove correctness, judge contributor intent, guarantee production readiness, or sandbox arbitrary code. Configured commands execute with the permissions of the user running the tool. Read `docs/threat-model.md` before using it on untrusted repositories. See [`docs/limitations.md`](docs/limitations.md) for supported inputs and known boundaries, [`docs/VERSIONING.md`](docs/VERSIONING.md) for compatibility expectations, and [`docs/RELEASING.md`](docs/RELEASING.md) for release procedure.
 
 ## Quick start
+
+Install from a cloned checkout with Python 3.11 or newer:
 
 ```bash
 git clone <your-repository-url>
 cd patchproof
-python3 -m venv .venv
+python -m venv .venv
 . .venv/bin/activate
-python -m pip install -e .
+python -m pip install .
+patchproof --help
 ```
+
+For development, install the project in editable mode and run the complete verification suite:
+
+```bash
+python -m pip install -e .
+python -m unittest discover -s tests -v
+tests/test_action.sh
+```
+
+The tag-driven release workflow builds a source archive and wheel after rerunning tests. See `docs/RELEASING.md` for the reproducible release procedure.
 
 Run the included fixture example:
 
@@ -96,6 +109,7 @@ The command writes:
 ```text
 /tmp/patchproof-report/report.md
 /tmp/patchproof-report/report.json
+/tmp/patchproof-report/results.sarif
 ```
 
 The CLI exits with code `1` when evidence or a configured command has an error, `0` for pass or warning, and `2` for invalid input or tool errors.
@@ -159,7 +173,7 @@ unified diff + JSON policy
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-The suite covers normal and malformed diffs, source/test evidence, dependency lockfile rules, deterministic reports, successful commands, timeouts, and output truncation.
+The suite covers normal and malformed diffs, quoted paths, source/test evidence, dependency lockfile rules, JUnit and coverage evidence, SARIF rendering, deterministic reports, successful commands, timeouts, output truncation, and real Git histories. `tests/test_action.sh` exercises the composite Action against a temporary two-commit repository.
 
 ## Contribution guide
 
@@ -167,12 +181,15 @@ The most useful early contributions are small and evidence-backed: a parser fixt
 
 ## Roadmap
 
-- Improve the Git adapter with rename-aware summaries and clearer revision diagnostics.
+The v1.0 release candidate is complete locally. Future work should be driven by reproducible use cases rather than feature volume:
+
+- Improve the Git adapter with deeper rename-aware summaries and clearer revision diagnostics.
 - Add adapters for additional coverage formats and richer test-result metadata.
 - Improve SARIF locations for global findings and add richer rule metadata.
 - Add policy examples for Python, JavaScript, Go, and Rust repositories.
-- Improve renamed-file and binary-file reporting.
-- Publish the reusable GitHub Action only after local behavior and the consumer workflow are stable.
+- Consider YAML policy support only if a concrete maintenance need appears.
+
+See [`docs/ROADMAP.md`](docs/ROADMAP.md) for the ordered completion gates.
 
 ## Reusable GitHub Action
 

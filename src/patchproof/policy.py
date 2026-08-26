@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .coverage import evaluate_coverage
+from .coverage import CoverageError, evaluate_coverage, validate_coverage_policy
 from .models import ChangeSummary, CoverageSummary, Finding
 
 DEFAULT_POLICY: dict[str, Any] = {
@@ -56,6 +56,10 @@ def _validate_policy(policy: dict[str, Any]) -> None:
         raise PolicyError("command_timeout_seconds must be an integer from 1 to 3600")
     if not isinstance(max_output, int) or max_output <= 0 or max_output > 10_000_000:
         raise PolicyError("max_output_bytes must be an integer from 1 to 10000000")
+    try:
+        validate_coverage_policy(policy.get("coverage", {}))
+    except CoverageError as exc:
+        raise PolicyError(str(exc)) from exc
     for command in policy["commands"]:
         if not isinstance(command, dict) or not isinstance(command.get("name"), str) or not isinstance(command.get("command"), list):
             raise PolicyError("each command must contain a string name and a command list")

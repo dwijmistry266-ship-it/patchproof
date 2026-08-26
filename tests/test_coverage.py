@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 from patchproof.coverage import CoverageError, evaluate_coverage, parse_coverage_text
 from patchproof.models import ChangeSummary
-from patchproof.policy import DEFAULT_POLICY, evaluate_policy
+from patchproof.policy import DEFAULT_POLICY, PolicyError, evaluate_policy, load_policy
 from patchproof.report import build_report, render_markdown
 
 
@@ -54,6 +57,13 @@ class CoverageTests(unittest.TestCase):
     def test_invalid_threshold_is_rejected(self) -> None:
         with self.assertRaisesRegex(CoverageError, "minimum_line_rate"):
             evaluate_coverage(parse_coverage_text(VALID_COVERAGE), {"coverage": {"minimum_line_rate": 120}})
+
+    def test_policy_loader_rejects_invalid_threshold_without_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "policy.json"
+            path.write_text(json.dumps({"coverage": {"minimum_line_rate": 120}}), encoding="utf-8")
+            with self.assertRaisesRegex(PolicyError, "minimum_line_rate"):
+                load_policy(path)
 
     def test_policy_includes_coverage_findings(self) -> None:
         summary = parse_coverage_text(VALID_COVERAGE)

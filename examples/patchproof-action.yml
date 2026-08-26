@@ -1,5 +1,6 @@
 # Copy this file to .github/workflows/patchproof.yml in a consumer repository.
 # Replace the action reference with a reviewed release tag or commit SHA.
+# v1.0.0 is the stable release reference after the tag is published.
 name: PatchProof
 
 on:
@@ -17,12 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out full history
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
       - name: Run PatchProof
-        uses: dwijmistry266-ship-it/patchproof@v0.6.0-alpha
+        uses: dwijmistry266-ship-it/patchproof@v1.0.0
         with:
           config: examples/patchproof.json
           junit: examples/results.xml

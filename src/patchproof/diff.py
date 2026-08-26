@@ -1,12 +1,39 @@
 from __future__ import annotations
 
 import re
+import shlex
 from pathlib import PurePosixPath
 
 from .models import ChangedFile, ChangeSummary
 
 DIFF_HEADER = re.compile(r"^diff --git a/(.+) b/(.+)$")
 HUNK_HEADER = re.compile(r"^@@ -\d+(?:,\d+)? \+\d+(?:,\d+)? @@")
+
+
+def _unquote_path(value: str) -> str:
+    value = value.strip()
+    if not value:
+        raise ValueError("empty diff path")
+    try:
+        parts = shlex.split(value, posix=True)
+    except ValueError as exc:
+        raise ValueError("invalid quoted diff path") from exc
+    if len(parts) != 1:
+        raise ValueError("invalid diff path")
+    return parts[0]
+
+
+def _without_diff_prefix(value: str, prefix: str) -> str:
+    path = _unquote_path(value)
+    return _without_diff_prefix_token(path, prefix)
+
+
+def _without_diff_prefix_token(path: str, prefix: str) -> str:
+    if path == "/dev/null":
+        return path
+    if not path.startswith(prefix):
+        raise ValueError(f"diff path must start with '{prefix}'")
+    return path[len(prefix):]
 
 
 def classify_path(path: str) -> tuple[str, ...]:
@@ -38,10 +65,17 @@ def classify_path(path: str) -> tuple[str, ...]:
 
 
 def _parse_path(header: str) -> tuple[str, str]:
-    match = DIFF_HEADER.match(header)
-    if not match:
+    if not header.startswith("diff --git "):
         raise ValueError("invalid diff header; expected 'diff --git a/path b/path'")
-    return match.group(1), match.group(2)
+    try:
+        parts = shlex.split(header, posix=True)
+    except ValueError as exc:
+        raise ValueError("invalid quoted diff header") from exc
+    if len(parts) != 4 or parts[0:2] != ["diff", "--git"]:
+        raise ValueError("invalid diff header; expected 'diff --git a/path b/path'")
+    old_path = _without_diff_prefix_token(parts[2], "a/")
+    new_path = _without_diff_prefix_token(parts[3], "b/")
+    return old_path, new_path
 
 
 def parse_unified_diff(text: str) -> ChangeSummary:
@@ -71,8 +105,8 @@ def parse_unified_diff(text: str) -> ChangeSummary:
             elif current.startswith("Binary files"):
                 change_type = "binary"
             elif current.startswith("+++ ") and current[4:] != "/dev/null":
-                path = current[4:].removeprefix("b/")
-            elif current.startswith("--- ") and current[4:] == "/dev/null":
+                path = _without_diff_prefix(current[4:], "b/")
+            elif current.startswith("--- ") and _unquote_path(current[4:]) == "/dev/null":
                 change_type = "added"
             elif HUNK_HEADER.match(current):
                 index += 1
