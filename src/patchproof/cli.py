@@ -10,6 +10,7 @@ from .git import GitError, get_unified_diff
 from .junit import JUnitError, parse_junit_file
 from .policy import PolicyError, evaluate_policy, load_policy
 from .report import build_report, render_json, render_markdown
+from .sarif import render_sarif
 from .runner import run_commands
 
 
@@ -27,6 +28,7 @@ def build_parser() -> argparse.ArgumentParser:
     check.add_argument("--cwd", type=Path, default=None, help="Working directory for evidence commands")
     check.add_argument("--junit", type=Path, default=None, help="Path to a JUnit XML test-result report")
     check.add_argument("--coverage", type=Path, default=None, help="Path to a Cobertura/coverage.py XML report")
+    check.add_argument("--sarif", type=Path, default=None, help="Optional path for a SARIF 2.1.0 report")
     return parser
 
 
@@ -57,6 +59,9 @@ def run_check(args: argparse.Namespace) -> int:
         args.output_dir.mkdir(parents=True, exist_ok=True)
         (args.output_dir / "report.json").write_text(render_json(report), encoding="utf-8")
         (args.output_dir / "report.md").write_text(render_markdown(report), encoding="utf-8")
+        if args.sarif:
+            args.sarif.parent.mkdir(parents=True, exist_ok=True)
+            args.sarif.write_text(render_sarif(report), encoding="utf-8")
         print(f"PatchProof status: {report.overall_status}")
         print(f"Reports written to: {args.output_dir.resolve()}")
         return 1 if report.overall_status == "error" else 0

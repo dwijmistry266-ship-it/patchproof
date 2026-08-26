@@ -77,6 +77,20 @@ patchproof check \
 
 The policy may configure `minimum_line_rate` and `minimum_branch_rate` as values from `0` to `1`. Missing branch data is an error when a branch threshold is configured. Coverage is treated as one signal and never as proof of correctness.
 
+Produce a deterministic SARIF 2.1.0 file for compatible analysis consumers:
+
+```bash
+patchproof check \
+  --diff examples/source-with-tests.diff \
+  --junit examples/results.xml \
+  --coverage examples/coverage.xml \
+  --config examples/patchproof.json \
+  --output-dir /tmp/patchproof-report \
+  --sarif /tmp/patchproof-report/results.sarif
+```
+
+SARIF contains non-passing policy findings as results, stable rule IDs, relative file locations when a finding has related files, and partial fingerprints. Passing findings are omitted because they are evidence, not alerts. Global findings remain in the SARIF result without a fabricated source location; GitHub code-scanning views may not display such results as file annotations.
+
 The command writes:
 
 ```text
@@ -155,10 +169,18 @@ The most useful early contributions are small and evidence-backed: a parser fixt
 
 - Improve the Git adapter with rename-aware summaries and clearer revision diagnostics.
 - Add adapters for additional coverage formats and richer test-result metadata.
-- Add SARIF output.
+- Improve SARIF locations for global findings and add richer rule metadata.
 - Add policy examples for Python, JavaScript, Go, and Rust repositories.
 - Improve renamed-file and binary-file reporting.
 - Publish a GitHub Action only after the local CLI behavior is stable.
+
+## SARIF references
+
+PatchProof targets SARIF 2.1.0 as specified by OASIS [1]. GitHub’s supported SARIF subset uses stable rule identifiers, consistent relative paths, result levels, messages, and locations where available [2]. Uploading SARIF from GitHub Actions requires the `upload-sarif` action and appropriate workflow permissions [3].
+
+[1]: https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/sarif-v2.1.0-errata01-os-complete.html
+[2]: https://docs.github.com/en/code-security/reference/code-scanning/sarif-files/sarif-support
+[3]: https://docs.github.com/en/code-security/how-tos/find-and-fix-code-vulnerabilities/integrate-with-existing-tools/upload-sarif-file
 
 ## License
 

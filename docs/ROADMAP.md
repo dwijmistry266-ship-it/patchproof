@@ -2,9 +2,9 @@
 
 PatchProof will be completed in ordered milestones. Each milestone must be implemented, tested, documented, and verified in GitHub before the next milestone begins.
 
-## Current baseline: v0.2.0-alpha
+## Current baseline: v0.5.0-alpha (local; public repository pending update)
 
-The repository currently supports manual unified-diff input, explicit Git base/head revisions, JUnit XML test-result evidence, and Cobertura/coverage.py-style XML coverage evidence with configurable thresholds. It classifies changed files, evaluates evidence rules, runs explicitly configured commands with bounded output and timeouts, and writes Markdown and JSON reports. The local suite contains 32 tests, and the public CI workflow passes through the prior milestone.
+The repository currently supports manual unified-diff input, explicit Git base/head revisions, JUnit XML test-result evidence, Cobertura/coverage.py-style XML coverage evidence with configurable thresholds, and deterministic SARIF 2.1.0 output. It classifies changed files, evaluates evidence rules, runs explicitly configured commands with bounded output and timeouts, and writes Markdown, JSON, and SARIF reports. The local suite contains 36 tests, and the public CI workflow passed through the coverage milestone.
 
 ## Milestone 1 — JUnit XML test-result support
 
@@ -22,7 +22,7 @@ The repository currently supports manual unified-diff input, explicit Git base/h
 
 **Release gate:** Coverage fixtures, threshold tests, documentation, and a passing CI run.
 
-## Milestone 3 — SARIF output
+## Milestone 3 — SARIF output — complete locally as `0.5.0-alpha`
 
 **Goal:** Produce valid SARIF for policy findings so compatible code-scanning interfaces can consume PatchProof results.
 

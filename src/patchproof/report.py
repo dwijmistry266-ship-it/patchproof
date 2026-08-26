@@ -6,7 +6,7 @@ from typing import Any
 
 from .models import ChangeSummary, CommandResult, CoverageSummary, EvidenceReport, Finding, TestSummary
 
-TOOL_VERSION = "0.4.0-alpha"
+TOOL_VERSION = "0.5.0-alpha"
 SCHEMA_VERSION = "0.1"
 
 
